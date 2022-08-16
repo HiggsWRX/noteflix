@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:developer' as devtools show log;
 
 import 'package:noteflix/constants/routes.dart';
+import 'package:noteflix/utils/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -79,14 +80,34 @@ class _LoginViewState extends State<LoginView> {
               } on FirebaseAuthException catch (e) {
                 switch (e.code) {
                   case 'user-not-found':
-                    devtools.log('User not found');
+                    showErrorDialog(
+                      context,
+                      'User not found',
+                    );
                     break;
                   case 'wrong-password':
-                    devtools.log('Wrong password');
+                    showErrorDialog(
+                      context,
+                      'Wrong credentials',
+                    );
+                    break;
+                  case 'invalid-email':
+                    showErrorDialog(
+                      context,
+                      'Invalid email',
+                    );
                     break;
                   default:
-                    devtools.log(e.code);
+                    showErrorDialog(
+                      context,
+                      e.code,
+                    );
                 }
+              } catch (e) {
+                showErrorDialog(
+                  context,
+                  e.toString(),
+                );
               }
             },
             child: const Text('Login'),
