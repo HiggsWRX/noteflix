@@ -1,12 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:noteflix/constants/routes.dart';
 import 'package:noteflix/firebase_options.dart';
 import 'package:noteflix/views/login_view.dart';
 import 'package:noteflix/views/register_view.dart';
 import 'package:noteflix/views/verify_email_view.dart';
-
-import 'dart:developer' as devtools show log;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,9 +24,9 @@ class AppWrapper extends StatelessWidget {
       ),
       home: const HomePage(),
       routes: {
-        '/login': (BuildContext context) => const LoginView(),
-        '/register': (BuildContext context) => const RegisterView(),
-        '/notes': (BuildContext context) => const NotesView(),
+        loginRoute: (BuildContext context) => const LoginView(),
+        registerRoute: (BuildContext context) => const RegisterView(),
+        notesRoute: (BuildContext context) => const NotesView(),
       },
     );
   }
@@ -93,7 +92,7 @@ class _NotesViewState extends State<NotesView> {
                     if (!mounted) return;
 
                     Navigator.of(context).pushNamedAndRemoveUntil(
-                      '/login',
+                      loginRoute,
                       (_) => false,
                     );
                   }
