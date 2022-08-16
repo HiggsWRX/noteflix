@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:noteflix/constants/routes.dart';
+import 'package:noteflix/services/auth/auth_exceptions.dart';
+import 'package:noteflix/services/auth/auth_service.dart';
 import 'package:noteflix/utils/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
@@ -59,48 +60,34 @@ class _RegisterViewState extends State<RegisterView> {
           TextButton(
             onPressed: () async {
               try {
-                final FirebaseAuth auth = FirebaseAuth.instance;
-                await auth.createUserWithEmailAndPassword(
+                await AuthService.firebase().createUser(
                   email: _email.text,
                   password: _password.text,
                 );
 
-                final user = auth.currentUser;
-                await user?.sendEmailVerification();
+                await AuthService.firebase().sendEmailVerification();
 
                 if (!mounted) return;
 
                 Navigator.of(context).pushNamed(
                   verifyEmailRoute,
                 );
-              } on FirebaseAuthException catch (e) {
-                switch (e.code) {
-                  case 'weak-password':
-                    await showErrorDialog(
-                      context,
-                      'The password is too weak.',
-                    );
-                    break;
-                  case 'email-already-in-use':
-                    await showErrorDialog(
-                      context,
-                      'The account already exists for that email.',
-                    );
-                    break;
-                  case 'invalid-email':
-                    await showErrorDialog(
-                      context,
-                      'The email address is malformed.',
-                    );
-                    break;
-                  default:
-                    await showErrorDialog(
-                      context,
-                      'An unknown error occurred.',
-                    );
-                    break;
-                }
-              } catch (e) {
+              } on WeakPasswordAuthException {
+                await showErrorDialog(
+                  context,
+                  'The password is too weak.',
+                );
+              } on EmailAlreadyInUseAuthException {
+                await showErrorDialog(
+                  context,
+                  'The account already exists for that email.',
+                );
+              } on InvalidEmailAuthException {
+                await showErrorDialog(
+                  context,
+                  'The email address is malformed.',
+                );
+              } on GenericAuthException {
                 await showErrorDialog(
                   context,
                   'An unknown error occurred.',

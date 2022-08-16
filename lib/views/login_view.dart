@@ -1,9 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import 'dart:developer' as devtools show log;
-
 import 'package:noteflix/constants/routes.dart';
+import 'package:noteflix/services/auth/auth_exceptions.dart';
+import 'package:noteflix/services/auth/auth_service.dart';
 import 'package:noteflix/utils/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
@@ -63,16 +61,17 @@ class _LoginViewState extends State<LoginView> {
           ),
           TextButton(
             onPressed: () async {
-              try {
-                final FirebaseAuth auth = FirebaseAuth.instance;
+              final email = _email.text;
+              final password = _password.text;
 
-                await auth.signInWithEmailAndPassword(
-                  email: _email.text,
-                  password: _password.text,
+              try {
+                AuthService.firebase().logIn(
+                  email: email,
+                  password: password,
                 );
 
-                final user = auth.currentUser;
-                final userEmailIsVerified = user?.emailVerified ?? false;
+                final user = AuthService.firebase().currentUser;
+                final userEmailIsVerified = user?.isEmailVerified ?? false;
 
                 if (!mounted) return;
 
@@ -87,34 +86,23 @@ class _LoginViewState extends State<LoginView> {
                     (route) => false,
                   );
                 }
-              } on FirebaseAuthException catch (e) {
-                switch (e.code) {
-                  case 'user-not-found':
-                    await showErrorDialog(
-                      context,
-                      'User not found',
-                    );
-                    break;
-                  case 'wrong-password':
-                    await showErrorDialog(
-                      context,
-                      'Wrong credentials',
-                    );
-                    break;
-                  case 'invalid-email':
-                    await showErrorDialog(
-                      context,
-                      'Invalid email',
-                    );
-                    break;
-                  default:
-                    await showErrorDialog(
-                      context,
-                      'An unknown error occurred',
-                    );
-                }
-              } catch (e) {
-                showErrorDialog(
+              } on UserNotFoundAuthException {
+                await showErrorDialog(
+                  context,
+                  'User not found',
+                );
+              } on WrongCredentialsAuthException {
+                await showErrorDialog(
+                  context,
+                  'Wrong credentials',
+                );
+              } on InvalidEmailAuthException {
+                await showErrorDialog(
+                  context,
+                  'Invalid email',
+                );
+              } on GenericAuthException {
+                await showErrorDialog(
                   context,
                   'An unknown error occurred',
                 );
