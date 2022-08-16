@@ -6,7 +6,7 @@ import 'package:noteflix/views/login_view.dart';
 import 'package:noteflix/views/register_view.dart';
 import 'package:noteflix/views/verify_email_view.dart';
 
-import 'dart:developer' as dev show log;
+import 'dart:developer' as devtools show log;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +27,7 @@ class AppWrapper extends StatelessWidget {
       routes: {
         '/login': (BuildContext context) => const LoginView(),
         '/register': (BuildContext context) => const RegisterView(),
+        '/notes': (BuildContext context) => const NotesView(),
       },
     );
   }
@@ -88,8 +89,13 @@ class _NotesViewState extends State<NotesView> {
 
                   if (shouldLogout) {
                     await FirebaseAuth.instance.signOut();
-                    Navigator.of(context)
-                        .pushNamedAndRemoveUntil('/login', (_) => false);
+
+                    if (!mounted) return;
+
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/login',
+                      (_) => false,
+                    );
                   }
 
                   break;
