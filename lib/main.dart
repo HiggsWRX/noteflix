@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:noteflix/firebase_options.dart';
+import 'package:noteflix/views/login_view.dart';
 import 'package:noteflix/views/register_view.dart';
 
 void main() {
@@ -20,6 +20,10 @@ class AppWrapper extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const HomePage(),
+      routes: {
+        '/login': (BuildContext context) => const LoginView(),
+        '/register': (BuildContext context) => const RegisterView(),
+      },
     );
   }
 }
@@ -29,29 +33,26 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
-      body: FutureBuilder(
-        future: Firebase.initializeApp(
-            options: DefaultFirebaseOptions.currentPlatform),
-        builder: (BuildContext context, AsyncSnapshot<FirebaseApp> snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              final user = FirebaseAuth.instance.currentUser;
-              final userIsVerified = user?.emailVerified ?? false;
+    return FutureBuilder(
+      future: Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform),
+      builder: (BuildContext context, AsyncSnapshot<FirebaseApp> snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.done:
+            // final user = FirebaseAuth.instance.currentUser;
+            // final userIsVerified = user?.emailVerified ?? false;
 
-              if (userIsVerified) {
-                print('Verified');
-              } else {
-                print('Not verified');
-              }
-
-              return const Text('Done');
-            default:
-              return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
+            // if (userIsVerified) {
+            //   print('Verified');
+            //   return const Text('Done');
+            // } else {
+            //   return const VerifyEmailView();
+            // }
+            return const LoginView();
+          default:
+            return const Center(child: CircularProgressIndicator());
+        }
+      },
     );
   }
 }
