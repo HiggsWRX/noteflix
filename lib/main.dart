@@ -27,6 +27,7 @@ class AppWrapper extends StatelessWidget {
         loginRoute: (BuildContext context) => const LoginView(),
         registerRoute: (BuildContext context) => const RegisterView(),
         notesRoute: (BuildContext context) => const NotesView(),
+        verifyEmailRoute: (BuildContext context) => const VerifyEmailView(),
       },
     );
   }

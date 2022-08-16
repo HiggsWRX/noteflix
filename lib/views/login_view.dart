@@ -71,42 +71,52 @@ class _LoginViewState extends State<LoginView> {
                   password: _password.text,
                 );
 
+                final user = auth.currentUser;
+                final userEmailIsVerified = user?.emailVerified ?? false;
+
                 if (!mounted) return;
 
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  notesRoute,
-                  (route) => false,
-                );
+                if (userEmailIsVerified) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    notesRoute,
+                    (route) => false,
+                  );
+                } else {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    verifyEmailRoute,
+                    (route) => false,
+                  );
+                }
               } on FirebaseAuthException catch (e) {
                 switch (e.code) {
                   case 'user-not-found':
-                    showErrorDialog(
+                    await showErrorDialog(
                       context,
                       'User not found',
                     );
                     break;
                   case 'wrong-password':
-                    showErrorDialog(
+                    await showErrorDialog(
                       context,
                       'Wrong credentials',
                     );
                     break;
                   case 'invalid-email':
-                    showErrorDialog(
+                    await showErrorDialog(
                       context,
                       'Invalid email',
                     );
                     break;
                   default:
-                    showErrorDialog(
+                    await showErrorDialog(
                       context,
-                      e.code,
+                      'An unknown error occurred',
                     );
                 }
               } catch (e) {
                 showErrorDialog(
                   context,
-                  e.toString(),
+                  'An unknown error occurred',
                 );
               }
             },
