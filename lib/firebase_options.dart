@@ -63,7 +63,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '18863689769',
     projectId: 'noteflix-f',
     storageBucket: 'noteflix-f.appspot.com',
-    iosClientId: '18863689769-qot6d3c2d5iav01md9gab4q6qpgspv5q.apps.googleusercontent.com',
+    iosClientId:
+        '18863689769-qot6d3c2d5iav01md9gab4q6qpgspv5q.apps.googleusercontent.com',
     iosBundleId: 'com.levelupknowledge.noteflix',
   );
 }

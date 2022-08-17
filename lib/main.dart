@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:noteflix/constants/routes.dart';
 import 'package:noteflix/services/auth/auth_service.dart';
 import 'package:noteflix/views/login_view.dart';
@@ -6,8 +7,15 @@ import 'package:noteflix/views/notes/create_update_note_view.dart';
 import 'package:noteflix/views/notes/notes_view.dart';
 import 'package:noteflix/views/register_view.dart';
 import 'package:noteflix/views/verify_email_view.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 
-void main() {
+Future<void> main() async {
+  if (kDebugMode) {
+    await dotenv.load(fileName: '.env');
+  } else {
+    await dotenv.load(fileName: ".env.prod");
+  }
+
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const AppWrapper());
 }

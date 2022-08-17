@@ -43,6 +43,7 @@ dependencies:
   path_provider: ^2.0.11
   path_provider_android: ^2.0.19
   path_provider_ios: ^2.0.11
+  flutter_dotenv: ^5.0.2
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +72,10 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+  assets:
+    - .env
+    - .env.production
+    - .env.example
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
