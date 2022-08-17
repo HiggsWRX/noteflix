@@ -4,6 +4,8 @@ import 'package:noteflix/constants/routes.dart';
 import 'package:noteflix/enums/menu_action.dart';
 import 'package:noteflix/services/auth/auth_service.dart';
 import 'package:noteflix/services/crud/note_service.dart';
+import 'package:noteflix/utils/dialogs/logout_dialog.dart';
+import 'package:noteflix/views/notes/notes_list_view.dart';
 import 'package:path_provider_android/path_provider_android.dart';
 import 'package:path_provider_ios/path_provider_ios.dart';
 
@@ -80,22 +82,15 @@ class _NotesViewState extends State<NotesView> {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                       case ConnectionState.active:
-                        // return ListView.builder(itemCount: snapshot.data, itemBuilder: itemBuilder,)
                         if (snapshot.hasData) {
                           final allNotes = snapshot.data as List<DBNote>;
-                          return ListView.builder(
-                              itemCount: allNotes.length,
-                              itemBuilder: (context, index) {
-                                final note = allNotes[index];
-                                return ListTile(
-                                  title: Text(
-                                    note.text,
-                                    maxLines: 1,
-                                    softWrap: true,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                );
-                              });
+
+                          return NotesListView(
+                            notes: allNotes,
+                            onDeleteNote: (note) async {
+                              await _noteService.deleteNote(id: note.id);
+                            },
+                          );
                         }
 
                         return const Center(
@@ -116,30 +111,4 @@ class _NotesViewState extends State<NotesView> {
           }),
     );
   }
-}
-
-Future<bool> showLogoutDialog(BuildContext context) {
-  return showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: const Text('Sign out'),
-        content: const Text('Are you sure you want to sign out?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(true);
-            },
-            child: const Text('Sign out'),
-          ),
-        ],
-      );
-    },
-  ).then((value) => value ?? false);
 }
