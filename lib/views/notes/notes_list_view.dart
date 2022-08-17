@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:noteflix/services/crud/note_service.dart';
 import 'package:noteflix/utils/dialogs/delete_dialog.dart';
 
-typedef DeleteNoteCallback = void Function(DBNote);
+typedef NoteCallback = void Function(DBNote);
 
 class NotesListView extends StatelessWidget {
   final List<DBNote> notes;
-  final DeleteNoteCallback onDeleteNote;
+  final NoteCallback onDeleteNote;
+  final NoteCallback onTapNote;
 
   const NotesListView({
     Key? key,
     required this.notes,
     required this.onDeleteNote,
+    required this.onTapNote,
   }) : super(key: key);
 
   @override
@@ -27,6 +29,7 @@ class NotesListView extends StatelessWidget {
               softWrap: true,
               overflow: TextOverflow.ellipsis,
             ),
+            onTap: () => onTapNote(note),
             trailing: IconButton(
               onPressed: () async {
                 final shouldDelete = await showDeleteDialog(context);

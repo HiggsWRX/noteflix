@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:noteflix/constants/routes.dart';
 import 'package:noteflix/services/auth/auth_service.dart';
 import 'package:noteflix/views/login_view.dart';
-import 'package:noteflix/views/notes/new_note_view.dart';
+import 'package:noteflix/views/notes/create_update_note_view.dart';
 import 'package:noteflix/views/notes/notes_view.dart';
 import 'package:noteflix/views/register_view.dart';
 import 'package:noteflix/views/verify_email_view.dart';
@@ -27,7 +27,8 @@ class AppWrapper extends StatelessWidget {
         loginRoute: (BuildContext context) => const LoginView(),
         registerRoute: (BuildContext context) => const RegisterView(),
         notesRoute: (BuildContext context) => const NotesView(),
-        newNoteRoute: (BuildContext context) => const NewNoteView(),
+        createOrUpdateNoteRoute: (BuildContext context) =>
+            const CreateUpdateNoteView(),
         verifyEmailRoute: (BuildContext context) => const VerifyEmailView(),
       },
     );
