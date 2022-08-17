@@ -1,26 +1,30 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:noteflix/services/auth/auth_service.dart';
-import 'package:noteflix/services/auth/auth_user.dart';
 import 'package:noteflix/services/crud/crud_exceptions.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-class NotesService {
+class NoteService {
   Database? _db;
   List<DBNote> _notes = [];
-  final _notesStreamController = StreamController<List<DBNote>>.broadcast();
 
-  static final NotesService _shared = NotesService._sharedInstance();
-  NotesService._sharedInstance();
-  factory NotesService() => _shared;
+  static final NoteService _shared = NoteService._sharedInstance();
+  NoteService._sharedInstance() {
+    _notesStreamController = StreamController<List<DBNote>>.broadcast(
+      onListen: () {
+        _notesStreamController.sink.add(_notes);
+      },
+    );
+  }
+  factory NoteService() => _shared;
 
+  late final StreamController<List<DBNote>> _notesStreamController;
   Stream<List<DBNote>> get allNotes => _notesStreamController.stream;
 
-  Future<void> _cacheNotes(DBUser owner) async {
-    final allNotes = await getAllNotes(owner: owner);
+  Future<void> _cacheNotes() async {
+    final allNotes = await getAllNotes();
     _notes = allNotes.toList();
     _notesStreamController.add(_notes);
   }
@@ -59,16 +63,7 @@ class NotesService {
 
       await db.execute(createUserTable);
       await db.execute(createNoteTable);
-
-      AuthUser? currentUserDetails = AuthService.firebase().currentUser;
-      currentUserDetails ??=
-          const AuthUser(email: 'anonymous', isEmailVerified: false);
-
-      final currentUser = await getOrCreateUser(
-        email: currentUserDetails.email ?? 'anonymous',
-      );
-
-      await _cacheNotes(currentUser);
+      await _cacheNotes();
     } on MissingPlatformDirectoryException {
       throw UnableToGetDocumentsDirectoryException();
     }
@@ -111,6 +106,7 @@ class NotesService {
   Future<DBUser> getUser({required String email}) async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
+
     final results = await db.query(
       userTable,
       limit: 1,
@@ -199,22 +195,12 @@ class NotesService {
     _notesStreamController.add(_notes);
   }
 
-  Future<int> deleteAllNotes({
-    required DBUser owner,
-  }) async {
+  Future<int> deleteAllNotes() async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
-    final dbUser = await getUser(email: owner.email);
-
-    if (dbUser != owner) {
-      throw UserNotFoundException();
-    }
-
     final numberOfDeletions = await db.delete(
       noteTable,
-      where: 'user_id = ?',
-      whereArgs: [owner.id],
     );
 
     _notes = [];
@@ -247,22 +233,12 @@ class NotesService {
     return note;
   }
 
-  Future<Iterable<DBNote>> getAllNotes({
-    required DBUser owner,
-  }) async {
+  Future<Iterable<DBNote>> getAllNotes() async {
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
-    final dbUser = await getUser(email: owner.email);
-
-    if (dbUser != owner) {
-      throw UserNotFoundException();
-    }
-
     final results = await db.query(
       noteTable,
-      where: 'user_id = ?',
-      whereArgs: [owner.id],
     );
 
     return results.map((row) => DBNote.fromRow(row)).toList();
@@ -300,7 +276,8 @@ class NotesService {
 
       return user;
     } on UserNotFoundException {
-      return await createUser(email: email);
+      final createdUser = await createUser(email: email);
+      return createdUser;
     } catch (e) {
       rethrow;
     }
@@ -369,20 +346,16 @@ const emailColumn = 'email';
 const userIdColumn = 'user_id';
 const textColumn = 'text';
 const isSyncedWithCloudColumn = 'is_synced_with_cloud';
-const createNoteTable = '''
-CREATE TABLE IF NOT EXISTS note (
-  id INTEGER NOT NULL,
-  user_id INTEGER NOT NULL,
-  text TEXT NOT NULL,
-  is_synced_with_cloud INTEGER NOT NULL DEFAULT 0,
-  FOREIGN KEY ("user_id") REFERENCES "user"("id")
-  PRIMARY KEY ("id" AUTOINCREMENT),
-);
-      ''';
-const createUserTable = '''
-CREATE TABLE IF NOT EXISTS user (
-  id INTEGER NOT NULL,
-  email TEXT NOT NULL UNIQUE,
-  PRIMARY KEY ("id" AUTOINCREMENT)
-);
-      ''';
+const createNoteTable = '''CREATE TABLE IF NOT EXISTS "note" (
+        "id"                    INTEGER NOT NULL,
+        "user_id"               INTEGER NOT NULL,
+        "text"                  TEXT,
+        "is_synced_with_cloud"  INTEGER NOT NULL DEFAULT 0,
+        FOREIGN KEY("user_id") REFERENCES "user"("id"),
+        PRIMARY KEY("id" AUTOINCREMENT)
+      );''';
+const createUserTable = '''CREATE TABLE IF NOT EXISTS "user" (
+        "id"    INTEGER NOT NULL,
+        "email" TEXT NOT NULL UNIQUE,
+        PRIMARY KEY("id" AUTOINCREMENT)
+      );''';

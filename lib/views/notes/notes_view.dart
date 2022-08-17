@@ -15,78 +15,92 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-  late final NotesService _notesService;
+  late final NoteService _noteService;
   String get userEmail => AuthService.firebase().currentUser!.email!;
 
   @override
   void initState() {
     if (Platform.isAndroid) PathProviderAndroid.registerWith();
     if (Platform.isIOS) PathProviderIOS.registerWith();
-    _notesService = NotesService();
+    _noteService = NoteService();
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    _notesService.close();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Noteflix - Your Notes'),
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed(newNoteRoute);
-              },
-              icon: const Icon(Icons.add),
-            ),
-            PopupMenuButton<MenuAction>(
-              onSelected: (value) async {
-                switch (value) {
-                  case MenuAction.logout:
-                    final shouldLogout = await showLogoutDialog(context);
+      appBar: AppBar(
+        title: const Text('Noteflix - Your Notes'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed(newNoteRoute);
+            },
+            icon: const Icon(Icons.add),
+          ),
+          PopupMenuButton<MenuAction>(
+            onSelected: (value) async {
+              switch (value) {
+                case MenuAction.logout:
+                  final shouldLogout = await showLogoutDialog(context);
 
-                    if (shouldLogout) {
-                      await AuthService.firebase().logOut();
+                  if (shouldLogout) {
+                    await AuthService.firebase().logOut();
 
-                      if (!mounted) return;
+                    if (!mounted) return;
 
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                        loginRoute,
-                        (_) => false,
-                      );
-                    }
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      loginRoute,
+                      (_) => false,
+                    );
+                  }
 
-                    break;
-                }
-              },
-              itemBuilder: (context) {
-                return const [
-                  PopupMenuItem<MenuAction>(
-                    value: MenuAction.logout,
-                    child: Text('Sign out'),
-                  ),
-                ];
-              },
-            ),
-          ],
-        ),
-        body: FutureBuilder(
-          future: _notesService.getOrCreateUser(email: userEmail),
-          builder: ((context, snapshot) {
+                  break;
+              }
+            },
+            itemBuilder: (context) {
+              return const [
+                PopupMenuItem<MenuAction>(
+                  value: MenuAction.logout,
+                  child: Text('Sign out'),
+                ),
+              ];
+            },
+          ),
+        ],
+      ),
+      body: FutureBuilder(
+          future: _noteService.getOrCreateUser(email: userEmail),
+          builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
                 return StreamBuilder(
-                  stream: _notesService.allNotes,
+                  stream: _noteService.allNotes,
                   builder: (context, snapshot) {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
                       case ConnectionState.active:
-                        return const Text('Waiting for all notes...');
+                        // return ListView.builder(itemCount: snapshot.data, itemBuilder: itemBuilder,)
+                        if (snapshot.hasData) {
+                          final allNotes = snapshot.data as List<DBNote>;
+                          return ListView.builder(
+                              itemCount: allNotes.length,
+                              itemBuilder: (context, index) {
+                                final note = allNotes[index];
+                                return ListTile(
+                                  title: Text(
+                                    note.text,
+                                    maxLines: 1,
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                );
+                              });
+                        }
+
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
                       default:
                         return const Center(
                           child: CircularProgressIndicator(),
@@ -100,7 +114,7 @@ class _NotesViewState extends State<NotesView> {
                 );
             }
           }),
-        ));
+    );
   }
 }
 

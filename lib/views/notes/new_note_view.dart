@@ -11,7 +11,7 @@ class NewNoteView extends StatefulWidget {
 
 class _NewNoteViewState extends State<NewNoteView> {
   DBNote? _note;
-  late final NotesService _notesService;
+  late final NoteService _noteService;
   late final TextEditingController _textController;
 
   Future<DBNote> createNewNote() async {
@@ -23,15 +23,15 @@ class _NewNoteViewState extends State<NewNoteView> {
 
     final currentUser = AuthService.firebase().currentUser!;
     final email = currentUser.email!;
-    final owner = await _notesService.getUser(email: email);
-    return await _notesService.createNote(owner: owner);
+    final owner = await _noteService.getUser(email: email);
+    return await _noteService.createNote(owner: owner);
   }
 
   void _deleteNoteIfTextIsEmpty() {
     final note = _note;
 
     if (_textController.text.isEmpty && note != null) {
-      _notesService.deleteNote(id: note.id);
+      _noteService.deleteNote(id: note.id);
     }
   }
 
@@ -40,7 +40,7 @@ class _NewNoteViewState extends State<NewNoteView> {
     final text = _textController.text;
 
     if (text.isNotEmpty && note != null) {
-      await _notesService.updateNote(
+      await _noteService.updateNote(
         note: note,
         text: _textController.text,
       );
@@ -49,7 +49,7 @@ class _NewNoteViewState extends State<NewNoteView> {
 
   @override
   void initState() {
-    _notesService = NotesService();
+    _noteService = NoteService();
     _textController = TextEditingController();
     super.initState();
   }
