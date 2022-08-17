@@ -8,7 +8,7 @@ import 'package:noteflix/services/auth/auth_user.dart';
 class FirebaseAuthProvider implements AuthProvider {
   @override
   Future<void> initialize() async {
-    await Firebase.initializeApp(
+    Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
@@ -97,7 +97,7 @@ class FirebaseAuthProvider implements AuthProvider {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      await FirebaseAuth.instance.signOut();
+      return FirebaseAuth.instance.signOut();
     }
 
     throw UserNotLoggedInAuthException();
@@ -108,7 +108,7 @@ class FirebaseAuthProvider implements AuthProvider {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      await user.sendEmailVerification();
+      return user.sendEmailVerification();
     }
 
     throw UserNotLoggedInAuthException();

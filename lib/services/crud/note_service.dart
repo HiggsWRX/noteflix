@@ -13,6 +13,12 @@ class NotesService {
   List<DBNote> _notes = [];
   final _notesStreamController = StreamController<List<DBNote>>.broadcast();
 
+  static final NotesService _shared = NotesService._sharedInstance();
+  NotesService._sharedInstance();
+  factory NotesService() => _shared;
+
+  Stream<List<DBNote>> get allNotes => _notesStreamController.stream;
+
   Future<void> _cacheNotes(DBUser owner) async {
     final allNotes = await getAllNotes(owner: owner);
     _notes = allNotes.toList();
@@ -27,6 +33,16 @@ class NotesService {
     }
 
     return db;
+  }
+
+  Future<void> _ensureDbIsOpen() async {
+    try {
+      await open();
+    } on DatabaseAlreadyOpenException {
+      // empty
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<void> open() async {
@@ -49,7 +65,7 @@ class NotesService {
           const AuthUser(email: 'anonymous', isEmailVerified: false);
 
       final currentUser = await getOrCreateUser(
-        email: currentUserDetails.email,
+        email: currentUserDetails.email ?? 'anonymous',
       );
 
       await _cacheNotes(currentUser);
@@ -66,6 +82,7 @@ class NotesService {
   }
 
   Future<DBUser> createUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final results = await db.query(
       userTable,
@@ -92,6 +109,7 @@ class NotesService {
   }
 
   Future<DBUser> getUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final results = await db.query(
       userTable,
@@ -112,6 +130,7 @@ class NotesService {
   ///  - email: The email of the user to delete.
   /// Throws [CouldNotDeleteUserException] if the user could not be deleted.
   Future<void> deleteUser({required String email}) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
     final deletedCount = await db.delete(
@@ -128,6 +147,7 @@ class NotesService {
   Future<DBNote> createNote({
     required DBUser owner,
   }) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
     final dbUser = await getUser(email: owner.email);
@@ -162,6 +182,7 @@ class NotesService {
   Future<void> deleteNote({
     required int id,
   }) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
     final deletedCount = await db.delete(
@@ -181,6 +202,7 @@ class NotesService {
   Future<int> deleteAllNotes({
     required DBUser owner,
   }) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
     final dbUser = await getUser(email: owner.email);
@@ -204,6 +226,7 @@ class NotesService {
   Future<DBNote> getNote({
     required int id,
   }) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
     final results = await db.query(
       noteTable,
@@ -227,6 +250,7 @@ class NotesService {
   Future<Iterable<DBNote>> getAllNotes({
     required DBUser owner,
   }) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
     final dbUser = await getUser(email: owner.email);
@@ -248,6 +272,7 @@ class NotesService {
     required DBNote note,
     required String text,
   }) async {
+    await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
     await getNote(id: note.id);
@@ -345,19 +370,19 @@ const userIdColumn = 'user_id';
 const textColumn = 'text';
 const isSyncedWithCloudColumn = 'is_synced_with_cloud';
 const createNoteTable = '''
-        CREATE TABLE IF NOT EXISTS note (
-          id INTEGER NOT NULL,
-          user_id INTEGER NOT NULL,
-          text TEXT NOT NULL,
-          is_synced_with_cloud INTEGER NOT NULL DEFAULT 0,
-          FOREIGN KEY ("user_id") REFERENCES "user"("id")
-          PRIMARY KEY ("id" AUTOINCREMENT),
-        );
+CREATE TABLE IF NOT EXISTS note (
+  id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  text TEXT NOT NULL,
+  is_synced_with_cloud INTEGER NOT NULL DEFAULT 0,
+  FOREIGN KEY ("user_id") REFERENCES "user"("id")
+  PRIMARY KEY ("id" AUTOINCREMENT),
+);
       ''';
 const createUserTable = '''
-        CREATE TABLE IF NOT EXISTS user (
-          id INTEGER NOT NULL,
-          email TEXT NOT NULL UNIQUE,
-          PRIMARY KEY ("id" AUTOINCREMENT)
-        );
+CREATE TABLE IF NOT EXISTS user (
+  id INTEGER NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  PRIMARY KEY ("id" AUTOINCREMENT)
+);
       ''';
