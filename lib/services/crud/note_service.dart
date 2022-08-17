@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:noteflix/services/crud/crud_exceptions.dart';
 import 'package:path/path.dart' show join;
@@ -9,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 class NoteService {
   Database? _db;
   List<DBNote> _notes = [];
+  DBUser? _user;
 
   static final NoteService _shared = NoteService._sharedInstance();
   NoteService._sharedInstance() {
@@ -63,7 +63,6 @@ class NoteService {
 
       await db.execute(createUserTable);
       await db.execute(createNoteTable);
-      await _cacheNotes();
     } on MissingPlatformDirectoryException {
       throw UnableToGetDocumentsDirectoryException();
     }
@@ -234,11 +233,19 @@ class NoteService {
   }
 
   Future<Iterable<DBNote>> getAllNotes() async {
+    final currentUser = _user;
+
+    if (currentUser == null) {
+      throw UserShouldBeSetBeforeReadingAllNotesException;
+    }
+
     await _ensureDbIsOpen();
     final db = _getDatabaseOrThrow();
 
     final results = await db.query(
       noteTable,
+      where: 'user_id = ?',
+      whereArgs: [currentUser.id],
     );
 
     return results.map((row) => DBNote.fromRow(row)).toList();
@@ -270,16 +277,28 @@ class NoteService {
     return await getNote(id: note.id);
   }
 
-  Future<DBUser> getOrCreateUser({required String email}) async {
+  Future<DBUser> getOrCreateUser(
+      {required String email, bool setAsCurrentUser = true}) async {
     try {
       final user = await getUser(email: email);
+
+      if (setAsCurrentUser) {
+        _user = user;
+      }
 
       return user;
     } on UserNotFoundException {
       final createdUser = await createUser(email: email);
+
+      if (setAsCurrentUser) {
+        _user = createdUser;
+      }
+
       return createdUser;
     } catch (e) {
       rethrow;
+    } finally {
+      _cacheNotes();
     }
   }
 }
