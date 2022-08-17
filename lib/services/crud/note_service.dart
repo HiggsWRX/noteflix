@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:noteflix/services/auth/auth_service.dart';
+import 'package:noteflix/services/auth/auth_user.dart';
 import 'package:noteflix/services/crud/crud_exceptions.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -6,6 +10,14 @@ import 'package:sqflite/sqflite.dart';
 
 class NotesService {
   Database? _db;
+  List<DBNote> _notes = [];
+  final _notesStreamController = StreamController<List<DBNote>>.broadcast();
+
+  Future<void> _cacheNotes(DBUser owner) async {
+    final allNotes = await getAllNotes(owner: owner);
+    _notes = allNotes.toList();
+    _notesStreamController.add(_notes);
+  }
 
   Database _getDatabaseOrThrow() {
     final db = _db;
@@ -31,6 +43,16 @@ class NotesService {
 
       await db.execute(createUserTable);
       await db.execute(createNoteTable);
+
+      AuthUser? currentUserDetails = AuthService.firebase().currentUser;
+      currentUserDetails ??=
+          const AuthUser(email: 'anonymous', isEmailVerified: false);
+
+      final currentUser = await getOrCreateUser(
+        email: currentUserDetails.email,
+      );
+
+      await _cacheNotes(currentUser);
     } on MissingPlatformDirectoryException {
       throw UnableToGetDocumentsDirectoryException();
     }
@@ -124,12 +146,17 @@ class NotesService {
       },
     );
 
-    return DBNote(
+    final note = DBNote(
       id: noteId,
       userId: owner.id,
       text: text,
       isSyncedWithCloud: true,
     );
+
+    _notes.add(note);
+    _notesStreamController.add(_notes);
+
+    return note;
   }
 
   Future<void> deleteNote({
@@ -146,6 +173,9 @@ class NotesService {
     if (deletedCount != 1) {
       throw CouldNotDeleteNoteException();
     }
+
+    _notes.removeWhere((note) => note.id == id);
+    _notesStreamController.add(_notes);
   }
 
   Future<int> deleteAllNotes({
@@ -159,11 +189,16 @@ class NotesService {
       throw UserNotFoundException();
     }
 
-    return await db.delete(
+    final numberOfDeletions = await db.delete(
       noteTable,
       where: 'user_id = ?',
       whereArgs: [owner.id],
     );
+
+    _notes = [];
+    _notesStreamController.add(_notes);
+
+    return numberOfDeletions;
   }
 
   Future<DBNote> getNote({
@@ -181,7 +216,12 @@ class NotesService {
       throw NoteNotFoundException();
     }
 
-    return DBNote.fromRow(results.first);
+    final note = DBNote.fromRow(results.first);
+    _notes.removeWhere((note) => note.id == id);
+    _notes.add(note);
+    _notesStreamController.add(_notes);
+
+    return note;
   }
 
   Future<Iterable<DBNote>> getAllNotes({
@@ -227,6 +267,18 @@ class NotesService {
     }
 
     return await getNote(id: note.id);
+  }
+
+  Future<DBUser> getOrCreateUser({required String email}) async {
+    try {
+      final user = await getUser(email: email);
+
+      return user;
+    } on UserNotFoundException {
+      return await createUser(email: email);
+    } catch (e) {
+      rethrow;
+    }
   }
 }
 
