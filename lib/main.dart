@@ -39,12 +39,8 @@ class AppWrapper extends StatelessWidget {
         child: const HomePage(),
       ),
       routes: {
-        loginRoute: (BuildContext context) => const LoginView(),
-        registerRoute: (BuildContext context) => const RegisterView(),
-        notesRoute: (BuildContext context) => const NotesView(),
         createOrUpdateNoteRoute: (BuildContext context) =>
             const CreateUpdateNoteView(),
-        verifyEmailRoute: (BuildContext context) => const VerifyEmailView(),
       },
     );
   }
@@ -63,6 +59,8 @@ class HomePage extends StatelessWidget {
         return const VerifyEmailView();
       } else if (state is AuthStateUnauthenticated) {
         return const LoginView();
+      } else if (state is AuthStateRegistering) {
+        return const RegisterView();
       } else {
         return const Center(child: CircularProgressIndicator());
       }

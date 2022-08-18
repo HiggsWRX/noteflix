@@ -1,6 +1,7 @@
+import 'package:equatable/equatable.dart';
 import 'package:noteflix/services/crud/crud_constants.dart';
 
-class LocalNote {
+class LocalNote with EquatableMixin {
   final int id;
   final int userId;
   final String text;
@@ -24,8 +25,5 @@ class LocalNote {
       'Note, ID = $id, User ID = $userId, Is Synced With Cloud = $isSyncedWithCloud, Text = $text';
 
   @override
-  bool operator ==(covariant LocalNote other) => id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  List<Object?> get props => [id];
 }

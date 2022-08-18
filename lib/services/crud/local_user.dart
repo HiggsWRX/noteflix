@@ -1,8 +1,9 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart' show immutable;
 import 'package:noteflix/services/crud/crud_constants.dart';
 
 @immutable
-class LocalUser {
+class LocalUser with EquatableMixin {
   final int id;
   final String email;
 
@@ -19,8 +20,5 @@ class LocalUser {
   String toString() => 'Person, ID = $id, Email = $email';
 
   @override
-  bool operator ==(covariant LocalUser other) => id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  List<Object?> get props => [id];
 }
