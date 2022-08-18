@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:noteflix/constants/routes.dart';
 import 'package:noteflix/enums/menu_action.dart';
 import 'package:noteflix/services/auth/auth_service.dart';
-import 'package:noteflix/services/crud/local_note.dart';
-import 'package:noteflix/services/crud/note_service.dart';
+import 'package:noteflix/services/cloud/cloud_note.dart';
+import 'package:noteflix/services/cloud/firebase_cloud_storage.dart';
 import 'package:noteflix/utils/dialogs/logout_dialog.dart';
 import 'package:noteflix/views/notes/notes_list_view.dart';
 import 'package:path_provider_android/path_provider_android.dart';
@@ -18,14 +18,14 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-  late final NoteService _noteService;
-  String get userEmail => AuthService.firebase().currentUser!.email;
+  late final FirebaseCloudStorage _noteService;
+  String get userId => AuthService.firebase().currentUser!.id;
 
   @override
   void initState() {
     if (Platform.isAndroid) PathProviderAndroid.registerWith();
     if (Platform.isIOS) PathProviderIOS.registerWith();
-    _noteService = NoteService();
+    _noteService = FirebaseCloudStorage();
     super.initState();
   }
 
@@ -72,50 +72,39 @@ class _NotesViewState extends State<NotesView> {
           ),
         ],
       ),
-      body: FutureBuilder(
-          future: _noteService.getOrCreateUser(email: userEmail),
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                return StreamBuilder(
-                  stream: _noteService.allNotes,
-                  builder: (context, snapshot) {
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.waiting:
-                      case ConnectionState.active:
-                        if (snapshot.hasData) {
-                          final allNotes = snapshot.data as List<LocalNote>;
+      body: StreamBuilder(
+        stream: _noteService.allNotes(ownerUserId: userId),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+              if (snapshot.hasData) {
+                final allNotes = snapshot.data as Iterable<CloudNote>;
 
-                          return NotesListView(
-                            notes: allNotes,
-                            onDeleteNote: (note) async {
-                              await _noteService.deleteNote(id: note.id);
-                            },
-                            onTapNote: (note) {
-                              Navigator.of(context).pushNamed(
-                                createOrUpdateNoteRoute,
-                                arguments: note,
-                              );
-                            },
-                          );
-                        }
-
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      default:
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                    }
+                return NotesListView(
+                  notes: allNotes,
+                  onDeleteNote: (note) async {
+                    await _noteService.deleteNote(documentId: note.documentId);
+                  },
+                  onTapNote: (note) {
+                    Navigator.of(context).pushNamed(
+                      createOrUpdateNoteRoute,
+                      arguments: note,
+                    );
                   },
                 );
-              default:
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-            }
-          }),
+              }
+
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            default:
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+          }
+        },
+      ),
     );
   }
 }
