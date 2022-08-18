@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show immutable;
 import 'package:noteflix/services/crud/crud_constants.dart';
 
 @immutable

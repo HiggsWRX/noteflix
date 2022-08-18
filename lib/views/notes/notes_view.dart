@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:noteflix/constants/routes.dart';
 import 'package:noteflix/enums/menu_action.dart';
 import 'package:noteflix/services/auth/auth_service.dart';
+import 'package:noteflix/services/auth/bloc/auth_bloc.dart';
+import 'package:noteflix/services/auth/bloc/auth_event.dart';
 import 'package:noteflix/services/cloud/cloud_note.dart';
 import 'package:noteflix/services/cloud/firebase_cloud_storage.dart';
 import 'package:noteflix/utils/dialogs/logout_dialog.dart';
@@ -48,14 +51,11 @@ class _NotesViewState extends State<NotesView> {
                   final shouldLogout = await showLogoutDialog(context);
 
                   if (shouldLogout) {
-                    await AuthService.firebase().logOut();
-
                     if (!mounted) return;
 
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      loginRoute,
-                      (_) => false,
-                    );
+                    context
+                        .read<AuthBloc>()
+                        .add(const AuthEventUnauthenticate());
                   }
 
                   break;
@@ -65,7 +65,7 @@ class _NotesViewState extends State<NotesView> {
               return const [
                 PopupMenuItem<MenuAction>(
                   value: MenuAction.logout,
-                  child: Text('Sign out'),
+                  child: Text('Log out'),
                 ),
               ];
             },
