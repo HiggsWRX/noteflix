@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:noteflix/services/auth/auth_service.dart';
+import 'package:noteflix/services/crud/local_note.dart';
 import 'package:noteflix/services/crud/note_service.dart';
 import 'package:noteflix/utils/generics/get_arguments.dart';
 
@@ -11,12 +12,12 @@ class CreateUpdateNoteView extends StatefulWidget {
 }
 
 class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
-  DBNote? _note;
+  LocalNote? _note;
   late final NoteService _noteService;
   late final TextEditingController _textController;
 
-  Future<DBNote> createOrGetExistingNote(BuildContext context) async {
-    final widgetNote = context.getArgument<DBNote>();
+  Future<LocalNote> createOrGetExistingNote(BuildContext context) async {
+    final widgetNote = context.getArgument<LocalNote>();
 
     if (widgetNote != null) {
       _note = widgetNote;
@@ -32,7 +33,7 @@ class _CreateUpdateNoteViewState extends State<CreateUpdateNoteView> {
     }
 
     final currentUser = AuthService.firebase().currentUser!;
-    final email = currentUser.email!;
+    final email = currentUser.email;
     final owner = await _noteService.getUser(email: email);
     final newNote = await _noteService.createNote(owner: owner);
     _note = newNote;

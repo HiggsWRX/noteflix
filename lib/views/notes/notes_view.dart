@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:noteflix/constants/routes.dart';
 import 'package:noteflix/enums/menu_action.dart';
 import 'package:noteflix/services/auth/auth_service.dart';
+import 'package:noteflix/services/crud/local_note.dart';
 import 'package:noteflix/services/crud/note_service.dart';
 import 'package:noteflix/utils/dialogs/logout_dialog.dart';
 import 'package:noteflix/views/notes/notes_list_view.dart';
@@ -18,7 +19,7 @@ class NotesView extends StatefulWidget {
 
 class _NotesViewState extends State<NotesView> {
   late final NoteService _noteService;
-  String get userEmail => AuthService.firebase().currentUser!.email!;
+  String get userEmail => AuthService.firebase().currentUser!.email;
 
   @override
   void initState() {
@@ -83,7 +84,7 @@ class _NotesViewState extends State<NotesView> {
                       case ConnectionState.waiting:
                       case ConnectionState.active:
                         if (snapshot.hasData) {
-                          final allNotes = snapshot.data as List<DBNote>;
+                          final allNotes = snapshot.data as List<LocalNote>;
 
                           return NotesListView(
                             notes: allNotes,
