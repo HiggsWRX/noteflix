@@ -50,20 +50,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: '',
-    appId: '',
-    messagingSenderId: '',
-    projectId: '',
-    storageBucket: '',
+    apiKey: 'AIzaSyA9g0T3oPpyb2PT0L2-s7eDvToACkbkAPs',
+    appId: '1:633209044494:android:bbd6469960e3496e8e065f',
+    messagingSenderId: '633209044494',
+    projectId: 'noteflix-a',
+    storageBucket: 'noteflix-a.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: '',
-    appId: '',
-    messagingSenderId: '',
-    projectId: '',
-    storageBucket: '',
-    iosClientId: '',
-    iosBundleId: '',
+    apiKey: 'AIzaSyA-pWQA54JoMJj6zAuYO-mjutxn2j8lM4Q',
+    appId: '1:633209044494:ios:11f0af1e682bf2498e065f',
+    messagingSenderId: '633209044494',
+    projectId: 'noteflix-a',
+    storageBucket: 'noteflix-a.appspot.com',
+    iosClientId:
+        '633209044494-hlrorq6hpbmccre9paq6e9qq3tiek5gs.apps.googleusercontent.com',
+    iosBundleId: 'com.levelupknowledge.noteflix',
   );
 }

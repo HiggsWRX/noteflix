@@ -4,7 +4,8 @@ import 'package:noteflix/services/auth/bloc/auth_event.dart';
 import 'package:noteflix/services/auth/bloc/auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc(AuthProvider provider) : super(const AuthStateUninitialized()) {
+  AuthBloc(AuthProvider provider)
+      : super(const AuthStateUninitialized(isLoading: true)) {
     on<AuthEventInitialize>((_, emit) async {
       await provider.initialize();
       final user = provider.currentUser;
@@ -15,9 +16,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           isLoading: false,
         ));
       } else if (!user.isEmailVerified) {
-        emit(const AuthStateUnverifiedUser());
+        emit(const AuthStateUnverifiedUser(isLoading: false));
       } else {
-        emit(AuthStateAuthenticated(user));
+        emit(AuthStateAuthenticated(user: user, isLoading: false));
       }
     });
 
@@ -29,9 +30,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await provider.createUser(email: email, password: password);
         await provider.sendEmailVerification();
 
-        emit(const AuthStateUnverifiedUser());
+        emit(const AuthStateUnverifiedUser(isLoading: false));
       } on Exception catch (e) {
-        emit(AuthStateRegistering(e));
+        emit(AuthStateRegistering(exception: e, isLoading: false));
       }
     });
 
@@ -42,9 +43,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<AuthEventAuthenticate>((event, emit) async {
       emit(const AuthStateUnauthenticated(
-        exception: null,
-        isLoading: true,
-      ));
+          exception: null, isLoading: true, loadingText: 'Logging you in...'));
 
       final email = event.email;
       final password = event.password;
@@ -57,13 +56,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             exception: null,
             isLoading: false,
           ));
-          emit(const AuthStateUnverifiedUser());
+          emit(const AuthStateUnverifiedUser(isLoading: false));
         } else {
           emit(const AuthStateUnauthenticated(
             exception: null,
             isLoading: false,
           ));
-          emit(AuthStateAuthenticated(user));
+          emit(AuthStateAuthenticated(user: user, isLoading: false));
         }
       } on Exception catch (e) {
         emit(AuthStateUnauthenticated(
@@ -89,7 +88,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<AuthEventShouldRegister>((_, emit) async {
-      emit(const AuthStateRegistering(null));
+      emit(const AuthStateRegistering(exception: null, isLoading: false));
     });
   }
 }

@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "18863689769",
-    "project_id": "noteflix-f",
-    "storage_bucket": "noteflix-f.appspot.com"
+    "project_number": "633209044494",
+    "project_id": "noteflix-a",
+    "storage_bucket": "noteflix-a.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:18863689769:android:0fa0f6ad0ec7c05abacc38",
+        "mobilesdk_app_id": "1:633209044494:android:bbd6469960e3496e8e065f",
         "android_client_info": {
           "package_name": "com.levelupknowledge.noteflix"
         }
       },
       "oauth_client": [
         {
-          "client_id": "18863689769-louo6pci17empb8mct874dbc4es8qjv3.apps.googleusercontent.com",
+          "client_id": "633209044494-slr26cn7bhufltiamdv9k121d2td54a5.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDYB2PjbpSaIFrIIQVTp4VG9oRdxvee-bo"
+          "current_key": "AIzaSyA9g0T3oPpyb2PT0L2-s7eDvToACkbkAPs"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "18863689769-louo6pci17empb8mct874dbc4es8qjv3.apps.googleusercontent.com",
+              "client_id": "633209044494-slr26cn7bhufltiamdv9k121d2td54a5.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
