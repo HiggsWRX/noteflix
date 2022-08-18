@@ -5,35 +5,31 @@ part 'env.g.dart';
 
 @Envied(path: kDebugMode ? '.env' : '.env.production')
 abstract class Env {
-  @EnviedField()
-  static const String firebaseProjectId = 'noteflix-a';
+  @EnviedField(varName: 'FIREBASE_PROJECT_ID')
+  static const String firebaseProjectId = _Env.firebaseProjectId;
 
-  @EnviedField()
-  static const String firebaseStorageBucket = 'noteflix-a.appspot.com';
+  @EnviedField(varName: 'FIREBASE_STORAGE_BUCKET')
+  static const String firebaseStorageBucket = _Env.firebaseStorageBucket;
 
-  @EnviedField()
-  static const String firebaseMessagingSenderId = '633209044494';
+  @EnviedField(varName: 'FIREBASE_MESSAGING_SENDER_ID')
+  static const String firebaseMessagingSenderId =
+      _Env.firebaseMessagingSenderId;
 
-  @EnviedField()
-  static const String firebaseAndroidApiKey =
-      'AIzaSyA9g0T3oPpyb2PT0L2-s7eDvToACkbkAPs';
+  @EnviedField(varName: 'FIREBASE_ANDROID_API_KEY')
+  static const String firebaseAndroidApiKey = _Env.firebaseAndroidApiKey;
 
-  @EnviedField()
-  static const String firebaseAndroidAppId =
-      '1:633209044494:android:bbd6469960e3496e8e065f';
+  @EnviedField(varName: 'FIREBASE_ANDROID_APP_ID')
+  static const String firebaseAndroidAppId = _Env.firebaseAndroidAppId;
 
-  @EnviedField()
-  static const String firebaseIOSApiKey =
-      'AIzaSyA-pWQA54JoMJj6zAuYO-mjutxn2j8lM4Q';
+  @EnviedField(varName: 'FIREBASE_IOS_API_KEY')
+  static const String firebaseIOSApiKey = _Env.firebaseIOSApiKey;
 
-  @EnviedField()
-  static const String firebaseIOSAppId =
-      '1:633209044494:ios:11f0af1e682bf2498e065f';
+  @EnviedField(varName: 'FIREBASE_IOS_APP_ID')
+  static const String firebaseIOSAppId = _Env.firebaseIOSAppId;
 
-  @EnviedField()
-  static const String firebaseIOSClientId =
-      '633209044494-hlrorq6hpbmccre9paq6e9qq3tiek5gs.apps.googleusercontent.com';
+  @EnviedField(varName: 'FIREBASE_IOS_CLIENT_ID')
+  static const String firebaseIOSClientId = _Env.firebaseIOSClientId;
 
-  @EnviedField()
-  static const String firebaseIOSBundleId = 'com.levelupknowledge.noteflix';
+  @EnviedField(varName: 'FIREBASE_IOS_BUNDLE_ID')
+  static const String firebaseIOSBundleId = _Env.firebaseIOSBundleId;
 }
