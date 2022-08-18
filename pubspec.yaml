@@ -44,6 +44,7 @@ dependencies:
   path_provider_android: ^2.0.19
   path_provider_ios: ^2.0.11
   flutter_dotenv: ^5.0.2
+  share_plus: ^4.0.10+1
 
 dev_dependencies:
   flutter_test:
