@@ -4,6 +4,7 @@ import 'package:noteflix/constants/routes.dart';
 import 'package:noteflix/services/auth/auth_exceptions.dart';
 import 'package:noteflix/services/auth/bloc/auth_bloc.dart';
 import 'package:noteflix/services/auth/bloc/auth_event.dart';
+import 'package:noteflix/services/auth/bloc/auth_state.dart';
 import 'package:noteflix/utils/dialogs/error_dialog.dart';
 
 class LoginView extends StatefulWidget {
@@ -61,38 +62,28 @@ class _LoginViewState extends State<LoginView> {
                   const InputDecoration(hintText: 'Enter your password here'),
             ),
           ),
-          TextButton(
-            onPressed: () async {
-              final email = _email.text;
-              final password = _password.text;
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) async {
+              if (state is AuthStateUnauthenticated) {
+                if (state.exception is UserNotFoundAuthException ||
+                    state.exception is WrongCredentialsAuthException) {
+                  await showErrorDialog(context, 'Wrong credentials');
+                } else if (state.exception is GenericAuthException) {
+                  await showErrorDialog(context, 'Something went wrong');
+                }
+              }
+            },
+            child: TextButton(
+              onPressed: () async {
+                final email = _email.text;
+                final password = _password.text;
 
-              try {
                 context
                     .read<AuthBloc>()
                     .add(AuthEventAuthenticate(email, password));
-              } on UserNotFoundAuthException {
-                await showErrorDialog(
-                  context,
-                  'User not found',
-                );
-              } on WrongCredentialsAuthException {
-                await showErrorDialog(
-                  context,
-                  'Wrong credentials',
-                );
-              } on InvalidEmailAuthException {
-                await showErrorDialog(
-                  context,
-                  'Invalid email',
-                );
-              } on GenericAuthException {
-                await showErrorDialog(
-                  context,
-                  'An unknown error occurred',
-                );
-              }
-            },
-            child: const Text('Login'),
+              },
+              child: const Text('Login'),
+            ),
           ),
           TextButton(
             onPressed: () {

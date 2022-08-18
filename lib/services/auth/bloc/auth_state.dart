@@ -16,20 +16,11 @@ class AuthStateAuthenticated extends AuthState {
   const AuthStateAuthenticated(this.user);
 }
 
-class AuthStateAuthenticateFailure extends AuthState {
-  final Exception exception;
-  const AuthStateAuthenticateFailure(this.exception);
-}
-
 class AuthStateUnverifiedUser extends AuthState {
   const AuthStateUnverifiedUser();
 }
 
 class AuthStateUnauthenticated extends AuthState {
-  const AuthStateUnauthenticated();
-}
-
-class AuthStateUnauthenticateFailure extends AuthState {
-  final Exception exception;
-  const AuthStateUnauthenticateFailure(this.exception);
+  final Exception? exception;
+  const AuthStateUnauthenticated(this.exception);
 }
