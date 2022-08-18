@@ -49,6 +49,7 @@ dependencies:
   flutter_bloc: ^8.1.1
   equatable: ^2.0.3
   flutter_launcher_icons: ^0.10.0
+  envied: ^0.2.2
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +62,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
   test: ^1.21.1
+  build_runner: ^2.2.0
+  envied_generator: ^0.2.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
