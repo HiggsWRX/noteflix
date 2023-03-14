@@ -13,6 +13,6 @@ Inject secrets at run-time with Envied (enables support for .env and .env.produc
 ## Running the project
 
 Before running, create `.env` (and `.env.production` if needed) based on env.example.
-
+Install packages/dependencies with `flutter pub get`
 You also need to run the Envied generator command before. `flutter pub run build_runner build`
 
